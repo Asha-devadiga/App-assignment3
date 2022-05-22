@@ -46,6 +46,9 @@ export const AppContext = createContext<AppContextType | null>(null);
 function App(): JSX.Element {
   const [searchText, setSearchText] = usePersistence("searchTerm", "React");
   const debouncedUrl = useDebounce(API_ENDPOINT + searchText);
+  const[query,setquery]=useState([]);
+  const handlePageChange=(event:any)=>{console.log(event);
+  setCurrentPage(event.selected)}
 
   const [stories, dispatchStories] = useReducer(storiesReducer, {
     data: [],
@@ -73,7 +76,7 @@ function App(): JSX.Element {
     } catch {
       dispatchStories({ type: "FETCH_FAILURE" });
     }
-  }, [debouncedUrl]);
+  }, [CurrentPage,query]);
 
   useEffect(() => {
     handleFetchStories();
@@ -222,6 +225,26 @@ function App(): JSX.Element {
         <AppContext.Provider value={{ onClickDelete: handleDeleteClick }}>
           <List listOfItems={stories.data} />
         </AppContext.Provider>
+        <div className="d-flex justify-content-center"><ReactPaginate
+            nextLabel=">>"
+            previousLabel="<<"
+            breakLabel="..."
+            forcePage={CurrentPage}
+            pageCount={50}
+            // renderOnZeroPageCount={null}
+            onPageChange={handlePageChange}
+            containerClassName={'pagination  pagination-lg  justify-content-center'}
+            pageClassName={'page-item'}
+            pageLinkClassName={'page-link'}
+            previousClassName={'page-item'}
+            previousLinkClassName={'page-link'}
+            nextClassName={'page-item'}
+            nextLinkClassName={'page-link'}
+            breakClassName={'page-item'}
+            breakLinkClassName={'page-link'}
+            activeClassName={'active'} /></div>
+            <InfiniteScroll dataLength={stories.data.length} next={() => setCurrentPage(CurrentPage + 1)} hasMore={true}  loader={<h4>Loading...</h4>}>
+            </InfiniteScroll></>
       )}
     </div>
   
